@@ -1,0 +1,20 @@
+{application, ipapi, [
+    {description, "Client API for ipapi.is in pure Erlang"},
+    {vsn, "0.1.0"},
+    {registered, [
+      ipapi_sup,
+      ipapi_connection
+    ]},
+    {mod, {ipapi_app, []}},
+    {applications, [
+        kernel,
+        stdlib,
+        gun,
+        jsone,
+        certifi
+    ]},
+    {env, []},
+    {modules, []},
+    {licenses, ["Apache-2.0"]},
+    {links, []}
+ ]}.

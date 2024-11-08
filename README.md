@@ -1,6 +1,9 @@
 # ipapi
 
-An OTP application
+A quick and dirty implementation of [ipapi.is](https://ipapi.is/)
+service using [gun](https://ninenines.eu/docs/en/gun),
+[certifi](https://github.com/certifi/erlang-certifi) and
+[jsone](https://github.com/sile/jsone) in pure Erlang.
 
 ## Build
 

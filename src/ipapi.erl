@@ -1,5 +1,12 @@
 %%%===================================================================
+%%% @copyright Arweave (c) 2024
+%%% @author Arweave team
+%%% @author Mathieu Kerjouan
+%%% @doc Main interface to request IPAPI API service.
 %%%
+%%% see: https://ipapi.is/developers.html
+%%%
+%%% @end
 %%%===================================================================
 -module(ipapi).
 -export([simple/1, bulk/1]).
@@ -7,7 +14,7 @@
 -define(API_URL, "api.ipapi.is").
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc check if a string is an IP address or not.
 %% @end
 %%-------------------------------------------------------------------
 -spec is_ip(list() | binary()) -> boolean().
@@ -19,7 +26,7 @@ is_ip(IP) ->
     end.
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc convert an IP address as binary using `inet:ntoa/1'.
 %% @end
 %%--------------------------------------------------------------------
 -spec ntoa(RawIP) -> Return when
@@ -40,10 +47,16 @@ ntoa(IP)
     end.
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc Returns IP API answers. Equivalent to:
 %%
 %% ```
 %% curl 'https://api.ipapi.is?q=32.5.140.2&key=private_key'
+%% '''
+%%
+%% == Examples ==
+%%
+%% ```
+%% ipapi:simple("1.2.3.4").
 %% '''
 %%
 %% @end
@@ -66,9 +79,7 @@ simple(IP) ->
     end.
 
 %%--------------------------------------------------------------------
-%% @doc
-%%
-%% Equivalent to:
+%% @doc Returns bulk api answer from IP API. Equivalent to:
 %%
 %% ```
 %% curl --header "Content-Type: application/json" \
@@ -77,12 +88,18 @@ simple(IP) ->
 %%      'https://api.ipapi.is?key=private_key
 %% '''
 %%
+%% == Examples ==
+%%
+%% ```
+%% ipapi:bulk(["1.2.3.4", "1.2.3.5"]).
+%% '''
+%%
 %% @end
 %%--------------------------------------------------------------------
 -spec bulk(IPs) -> Return when
       IPs :: [IP],
       IP :: string() | binary(),
-      Return :: {ok, map()}.
+      Return :: {ok, #{ IP => map()} }.
 
 bulk(IPs) ->
     Foldl = lists:foldl(
@@ -98,7 +115,7 @@ bulk(IPs) ->
     bulk2(Foldl).
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 bulk2([]) ->
     {error, no_valid_addresses};
@@ -116,13 +133,13 @@ bulk2(IPs) ->
 	     }).
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 request(Payload) ->
     request_apikey(Payload).
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 request_apikey(Payload) ->
     Query = maps:get(query, Payload, []),
@@ -136,7 +153,7 @@ request_apikey(Payload) ->
     end.
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 request_query(Payload) ->
     Query = maps:get(query, Payload, []),
@@ -153,7 +170,7 @@ request_query(Payload) ->
     end.
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 request_method(#{ method := get } = Payload) ->
     http_get(Payload);
@@ -161,7 +178,7 @@ request_method(#{ method := post } = Payload) ->
     http_post(Payload).
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 http_get(Payload) ->
     Connection = ipapi_connection:get_connection(),
@@ -175,7 +192,7 @@ http_get(Payload) ->
     await(Connection, Ref).
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 http_post(Payload) ->
     Connection = ipapi_connection:get_connection(),
@@ -190,7 +207,7 @@ http_post(Payload) ->
     await(Connection, Ref).
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 await(Connection, Ref) ->
     case gun:await(Connection, Ref) of
@@ -201,7 +218,7 @@ await(Connection, Ref) ->
     end.
 
 %%--------------------------------------------------------------------
-%%
+%% @hidden
 %%--------------------------------------------------------------------
 await_body(Connection, Ref) ->
     case gun:await_body(Connection, Ref) of
